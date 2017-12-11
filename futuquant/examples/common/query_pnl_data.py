@@ -29,7 +29,10 @@ def get_pnl_raw_data(quote_context, code, start='2017-01-01', end='2017-12-30'):
         close_n = row['close']
         if 0 == close_0:
             close_0 = float(close_n)
-        pnl = (close_n - close_0) / close_0 * 100.0 if close_0 != 0 else 0.0
+        close_diff = (close_n - close_0)
+        pnl = abs(close_diff) / abs(close_0) * 100.0 if close_0 != 0 else 0.0
+        if close_diff < 0:
+            pnl = -pnl
         raw_list.append({'code': code, 'pnl': pnl, 'datetime': str(row['time_key']).split(' ')[0]})
 
     col_list = ['code', 'datetime', 'pnl']
