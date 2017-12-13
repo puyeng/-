@@ -412,8 +412,8 @@ class MarketSnapshotQuery:
                           'wrt_end_trade': str(record['Wrt_EndTradeDateStr']),
                           'wrt_code': merge_stock_str(int(record['Wrt_OwnerMarketType']), record['Wrt_OwnerStockCode']),
                           'wrt_recovery_price': int1000_price_to_float(record['Wrt_RecoveryPrice']),
-                          'wrt_street_vol': int1000_price_to_float(record['Wrt_StreetVol']),
-                          'wrt_issue_vol': int1000_price_to_float(record['Wrt_IssueVol']),
+                          'wrt_street_vol': int(record['Wrt_StreetVol']),
+                          'wrt_issue_vol': int(record['Wrt_IssueVol']),
                           'wrt_street_ratio': int1000_price_to_float(record['Wrt_StreetRatio']),
                           'wrt_delta': int1000_price_to_float(record['Wrt_Delta']),
                           'wrt_implied_volatility': int1000_price_to_float(record['Wrt_ImpliedVolatility']),
@@ -646,17 +646,22 @@ class BrokerQueueQuery:
             return RET_ERROR, error_str, None
 
         raw_broker_bid = rsp_data["BrokerBidArr"]
-        bid_list = [{"bid_broker_id": record['BrokerID'],
-                     "bid_broker_name": record['BrokerName'],
-                     "bid_broker_pos": record['BrokerPos'],
-                     "code": merge_stock_str(int(rsp_data['Market']), rsp_data['StockCode'])
-                     } for record in raw_broker_bid]
+        bid_list = []
+        if raw_broker_bid is not None:
+            bid_list = [{"bid_broker_id": record['BrokerID'],
+                         "bid_broker_name": record['BrokerName'],
+                         "bid_broker_pos": record['BrokerPos'],
+                         "code": merge_stock_str(int(rsp_data['Market']), rsp_data['StockCode'])
+                         } for record in raw_broker_bid]
+
         raw_broker_ask = rsp_data["BrokerAskArr"]
-        ask_list = [{"ask_broker_id": record['BrokerID'],
-                     "ask_broker_name": record['BrokerName'],
-                     "ask_broker_pos": record['BrokerPos'],
-                     "code": merge_stock_str(int(rsp_data['Market']), rsp_data['StockCode'])
-                     } for record in raw_broker_ask]
+        ask_list = []
+        if raw_broker_bid is not None:
+            ask_list = [{"ask_broker_id": record['BrokerID'],
+                         "ask_broker_name": record['BrokerName'],
+                         "ask_broker_pos": record['BrokerPos'],
+                         "code": merge_stock_str(int(rsp_data['Market']), rsp_data['StockCode'])
+                         } for record in raw_broker_ask]
 
         return RET_OK, bid_list, ask_list
 
@@ -1480,7 +1485,7 @@ class MultiPointsHisKLine:
         pass
 
     @classmethod
-    def pack_req(cls, codes, dates, fields, ktype, autype, max_num):
+    def pack_req(cls, codes, dates, fields, ktype, autype, max_num, no_data_mode):
         """Convert from user request for trading days to PLS request"""
         list_req_stock = []
         for stock_str in codes:
@@ -1516,7 +1521,7 @@ class MultiPointsHisKLine:
                "Version": "1",
                "ReqParam": {
                    'Cookie': '10000',
-                   'NoDataMode': '1',
+                   'NoDataMode': str(no_data_mode),
                    'RehabType': str(AUTYPE_MAP[autype]),
                    'KLType': str(KTYPE_MAP[ktype]),
                    'MaxKLNum': str(max_num),

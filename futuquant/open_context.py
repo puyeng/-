@@ -513,7 +513,7 @@ class _SyncNetworkQueryCtx:
                 err = sys.exc_info()[1]
                 err_msg = ERROR_STR_PREFIX + str(err)
                 print("socket connect err:{}".format(err_msg))
-                sleep(1)
+                sleep(1.5)
                 continue
 
             if self._connected_handler is not None:
@@ -525,7 +525,7 @@ class _SyncNetworkQueryCtx:
                     self._force_close_session()
                     if is_retry:
                         print("wait to connect futunn plugin server")
-                        sleep(1)
+                        sleep(1.5)
                         continue
                     else:
                         return RET_ERROR, "obj is closed"
@@ -660,6 +660,8 @@ class OpenContextBase(object):
         self._proc_run = False
         self._net_proc = None
         self._sync_query_lock = RLock()
+
+        self._count_reconnect = 0
 
         if not self.__sync_socket_enable and not self.__async_socket_enable:
             raise Exception('you should specify at least one socket type to create !')
@@ -854,6 +856,8 @@ class OpenContextBase(object):
         if self._is_socket_reconnecting or self._is_obj_closed or self._sync_query_lock is None:
             return
 
+        self._count_reconnect += 1
+        print("_socket_reconnect_and_wait_ready - count = %s" % self._count_reconnect)
         try:
             self._is_socket_reconnecting = True
             self._sync_query_lock.acquire()
@@ -933,7 +937,12 @@ class OpenContextBase(object):
         """
         thread_handle = self._thread_check_sync_sock
         while True:
-            if self._is_obj_closed or self._thread_check_sync_sock is not thread_handle:
+            if self._thread_check_sync_sock is not thread_handle:
+                if self._thread_check_sync_sock is None:
+                    self._thread_is_exit = True
+                print ('check_sync_sock thread : exit by obj changed...')
+                return
+            if self._is_obj_closed:
                 self._thread_is_exit = True
                 return
             sync_net_ctx = self._sync_net_ctx
@@ -942,10 +951,10 @@ class OpenContextBase(object):
                 return
             # select sock to get err state
             if not sync_net_ctx.is_sock_ok(0.01):
-                if self._thread_check_sync_sock is thread_handle and not self._is_obj_closed:
-                    print("thread check socket error")
-                    self._socket_reconnect_and_wait_ready()
                 self._thread_is_exit = True
+                if self._thread_check_sync_sock is thread_handle and not self._is_obj_closed:
+                    print("check_sync_sock thread : reconnect !")
+                    self._socket_reconnect_and_wait_ready()
                 return
             else:
                 sleep(0.1)
@@ -1175,14 +1184,10 @@ class OpenQuoteContext(OpenContextBase):
 
     def get_market_snapshot(self, code_list):
         """get teh market snapshot"""
-        if code_list is None or isinstance(code_list, list) is False:
-            error_str = ERROR_STR_PREFIX + "the type of code_list param is wrong"
+        code_list = unique_and_normalize_list(code_list)
+        if not code_list:
+            error_str = ERROR_STR_PREFIX + "the type of code param is wrong"
             return RET_ERROR, error_str
-
-        for code in code_list:
-            if code is None or is_str(code) is False:
-                error_str = ERROR_STR_PREFIX + "the type of param in code_list is wrong"
-                return RET_ERROR, error_str
 
         query_processor = self._get_sync_query_processor(MarketSnapshotQuery.pack_req,
                                                          MarketSnapshotQuery.unpack_rsp)
@@ -1212,7 +1217,7 @@ class OpenQuoteContext(OpenContextBase):
     def get_rt_data(self, code):
         """get real-time data"""
         if code is None or is_str(code) is False:
-            error_str = ERROR_STR_PREFIX + "the type of param in code_list is wrong"
+            error_str = ERROR_STR_PREFIX + "the type of param in code is wrong"
             return RET_ERROR, error_str
 
         query_processor = self._get_sync_query_processor(RtDataQuery.pack_req,
@@ -1284,7 +1289,7 @@ class OpenQuoteContext(OpenContextBase):
     def get_broker_queue(self, code):
         """get teh queue of the broker"""
         if code is None or is_str(code) is False:
-            error_str = ERROR_STR_PREFIX + "the type of param in code_list is wrong"
+            error_str = ERROR_STR_PREFIX + "the type of param in code is wrong"
             return RET_ERROR, error_str
 
         query_processor = self._get_sync_query_processor(BrokerQueueQuery.pack_req,
@@ -1411,14 +1416,10 @@ class OpenQuoteContext(OpenContextBase):
         get_stock_quote to obtain the data
 
         """
-        if code_list is None or isinstance(code_list, list) is False:
+        code_list = unique_and_normalize_list(code_list)
+        if not code_list:
             error_str = ERROR_STR_PREFIX + "the type of code_list param is wrong"
             return RET_ERROR, error_str
-
-        for code in code_list:
-            if code is None or is_str(code) is False:
-                error_str = ERROR_STR_PREFIX + "the type of param in code_list is wrong"
-                return RET_ERROR, error_str
 
         query_processor = self._get_sync_query_processor(StockQuoteQuery.pack_req,
                                                          StockQuoteQuery.unpack_rsp,
@@ -1549,7 +1550,7 @@ class OpenQuoteContext(OpenContextBase):
 
         return RET_OK, pd_frame
 
-    def get_multi_points_history_kline(self, codes, dates, fields, ktype='K_DAY', autype='qfq'):
+    def get_multi_points_history_kline(self, codes, dates, fields, ktype='K_DAY', autype='qfq', no_data_mode=KL_NO_DATA_MODE_FORWARD):
         '''
         获取多支股票多个时间点的指定数据列
         :param codes: 单个或多个股票 'HK.00700'  or  ['HK.00700', 'HK.00001']
@@ -1557,6 +1558,7 @@ class OpenQuoteContext(OpenContextBase):
         :param fields:单个或多个数据列 KL_FIELD.ALL or [KL_FIELD.DATE_TIME, KL_FIELD.OPEN]
         :param ktype: K线类型
         :param autype:复权类型
+        :param no_data_mode: 指定时间为非交易日时，对应的k线数据取值模式，
         :return: pd frame 表头与指定的数据列相关， 固定表头包括'code'(代码) 'time_point'(指定的日期) 'data_valid' (0=无数据 1=请求点有数据 2=请求点无数据，取前一个)
         '''
         req_codes = unique_and_normalize_list(codes)
@@ -1592,7 +1594,7 @@ class OpenQuoteContext(OpenContextBase):
         # 循环请求数据，避免一次性取太多超时
         while not data_finish:
             print('get_multi_points_history_kline - wait ... %s' % datetime.now())
-            kargs = {"codes": req_codes, "dates": req_dates, "fields": req_fields, "ktype": ktype, "autype": autype, "max_num": max_kl_num}
+            kargs = {"codes": req_codes, "dates": req_dates, "fields": req_fields, "ktype": ktype, "autype": autype, "max_num": max_kl_num, "no_data_mode":no_data_mode}
             ret_code, msg, content = query_processor(**kargs)
             if ret_code == RET_ERROR:
                 return ret_code, msg
