@@ -415,7 +415,8 @@ string类型，格式YYYY-MM-DD，仅指定到日级别即可，取默认值None
 **返回**\ ：
 
 ret\_code失败时，ret\_data返回为错误描述字符串；
-客户端无数据时，ret\_code为成功，ret\_data返回None
+客户端无数据时，ret\_code为成功，ret\_data返回None；
+
 正常情况下，ret\_data为日期列表（每个日期是string类型），如果指定时间段中无交易日，则ret\_data为空列表。
 
 **失败情况**\ ：
@@ -459,7 +460,8 @@ ret\_code失败时，ret\_data返回为错误描述字符串；
 +------------+-------------+
 
 **返回**\ ： ret\_code失败时，ret\_data返回为错误描述字符串；
-客户端无符合条件数据时，ret\_code为成功，ret\_data返回None
+客户端无符合条件数据时，ret\_code为成功，ret\_data返回None；
+
 正常情况下，ret\_data为一个dataframe，其中包括：
 
 **code**\ ：股票代码；string，例如： ”HK.00700”，“US.AAPL”
@@ -501,7 +503,8 @@ ret\_code失败时，ret\_data返回为错误描述字符串；
 **返回**\ ：
 
 ret\_code失败时，ret\_data返回为错误描述字符串；
-客户端无符合条件数据时，ret\_code为成功，ret\_data返回None
+客户端无符合条件数据时，ret\_code为成功，ret\_data返回None；
+
 正常情况下，ret\_data为一个dataframe，其中包括：
 
 **code**\ ：股票代码，string，例如： ”HK.00700”，“US.AAPL”
@@ -571,8 +574,8 @@ start<=Time\_key<=end条件的k线作为返回内容，k线时间time\_key的设
 
 **返回**\ ：
 
-| ret\_code失败时，ret\_data返回为错误描述字符串；
-  客户端无符合条件数据时，ret\_code为成功，返回None
+ret\_code失败时，ret\_data返回为错误描述字符串；
+客户端无符合条件数据时，ret\_code为成功，返回None；
 
 正常情况下返回K线数据为一个DataFrame包含:
 
@@ -643,7 +646,8 @@ start<=Time\_key<=end条件的k线作为返回内容，k线时间time\_key的设
 **返回**\ ：
 
 ret\_code失败时，ret\_data返回为错误描述字符串；
-客户端无符合条件数据时，ret\_code为成功，ret\_data返回None
+客户端无符合条件数据时，ret\_code为成功，ret\_data返回None；
+
 正常情况下，ret\_data为一个dataframe，其中包括：
 
 **code** ：股票代码；string
@@ -770,7 +774,8 @@ ret\_code失败时，ret\_data返回为错误描述字符串；
 **返回**\ ：
 
 ret\_code失败时，ret\_data返回为错误描述字符串；
-客户端无符合条件数据时，ret\_code为成功，ret\_data返回None
+客户端无符合条件数据时，ret\_code为成功，ret\_data返回None；
+
 正常情况下，ret\_data为一个dataframe，其中包括：
 
 **code**: 股票代码： string
@@ -830,8 +835,8 @@ ret\_code失败时，ret\_data返回为错误描述字符串；
 
 **返回**\ ：
 
-| ret\_code失败时，ret\_data返回为错误描述字符串；
-  客户端无符合条件数据时，ret\_code为成功，返回None
+ret\_code失败时，ret\_data返回为错误描述字符串；
+客户端无符合条件数据时，ret\_code为成功，返回None；
 
 正常情况下返回K线数据为一个DataFrame包含:
 
@@ -868,7 +873,7 @@ ret\_code失败时，ret\_data返回为错误描述字符串；
 **返回**\ ：
 
 ret\_code失败时，ret\_data返回为错误描述字符串；
-客户端无符合条件数据时，ret\_code为成功，ret\_data返回None
+客户端无符合条件数据时，ret\_code为成功，ret\_data返回None；
 
 正常情况下，ret\_data为一个dataframe，其中包括：
 
@@ -937,7 +942,8 @@ ret\_code失败时，ret\_data返回为错误描述字符串；
 **返回**\ ：
 
 ret\_code失败时，bid\_data返回为错误描述字符串；
-客户端无符合条件数据时，ret\_code为成功，ask\_data, bid\_data返回None
+客户端无符合条件数据时，ret\_code为成功，ask\_data, bid\_data返回None；
+
 正常情况下，ask\_data, bid\_data均为dataframe，
 其中bid\_data是买盘的数据，包括：
 
@@ -972,12 +978,14 @@ ret\_code失败时，bid\_data返回为错误描述字符串；
 
 **参数**\ ：无
 
-| **返回**\ ： ret\_code失败时，ret\_data返回为错误描述字符串；
-  客户端无符合条件数据时，ret\_code为成功，ret\_data返回None
+**返回**\ ： 
+
+ret\_code失败时，ret\_data返回为错误描述字符串；
+客户端无符合条件数据时，ret\_code为成功，ret\_data返回None；
 
 正常情况下，ret\_data为dict，包括：
 
-| **Trade\_Logined**: 是否登陆交易服务器,int(0\|1), 1
+**Trade\_Logined**: 是否登陆交易服务器,int(0\|1), 1
   表示登陆，0表示未登陆
 
 **Quote\_Logined**\ ：是否登陆行情服务器,int(0\|1), 1
@@ -1061,7 +1069,7 @@ ret\_code失败时，bid\_data返回为错误描述字符串；
 **返回**\ ：
 
 ret\_code失败时，ret\_data返回为错误描述字符串；
-ret\_code为成功，ret\_data返回None 如果指定内容已订阅，则直接返回成功
+ret\_code为成功，ret\_data返回None; 如果指定内容已订阅，则直接返回成功
 
 **失败情况**:
 
@@ -1093,7 +1101,7 @@ ret\_code,ret\_data = unsubscribe(stock\_code, data\_type, unpush=True)
 **返回**\ ：
 
 ret\_code失败时，ret\_data返回为错误描述字符串；
-ret\_code为成功，ret\_data返回None 如果指定内容已退订，则直接返回成功
+ret\_code为成功，ret\_data返回None; 如果指定内容已退订，则直接返回成功
 
 **失败情况**:
 
@@ -1152,8 +1160,10 @@ ret\_code为成功，ret\_data返回None 如果指定内容已退订，则直接
 传入的codelist只允许包含1种股票类型的股票。
 必须确保code\_list中的股票均订阅成功后才能够执行
 
-**返回**\ ： ret\_code失败时，ret\_data返回为错误描述字符串；
-客户端无符合条件数据时，ret\_code为成功，返回None
+**返回**\ ： 
+
+ret\_code失败时，ret\_data返回为错误描述字符串；
+客户端无符合条件数据时，ret\_code为成功，返回None；
 正常情况下，ret\_data为一个dataframe，其中包括：
 
 **code** ：股票代码；string
@@ -1229,7 +1239,8 @@ ret\_code为成功，ret\_data返回None 如果指定内容已退订，则直接
 **返回**\ ：
 
 ret\_code失败时，ret\_data为错误描述字符串；
-客户端无符合条件数据时，ret为成功，ret\_data返回None
+客户端无符合条件数据时，ret为成功，ret\_data返回None；
+
 通常情况下，返回DataFrame，DataFrame每一行是一个逐笔记录，包含：
 
 **stock\_code** 股票代码
@@ -1306,7 +1317,8 @@ ticker\_direction:
 **返回**\ ：
 
 ret\_code失败时，ret\_data为错误描述字符串；
-客户端无符合条件数据时，ret为成功，ret\_data返回None
+客户端无符合条件数据时，ret为成功，ret\_data返回None；
+
 通常情况下，返回DataFrame，DataFrame内容和get\_history\_kline一样
 
 **失败情况**\ ：
@@ -1345,8 +1357,11 @@ ret\_code失败时，ret\_data为错误描述字符串；
 
 **code**: 股票代码，例如，HK.00700，US.AAPL
 
-**返回**\ ： ret\_code失败时，ret\_data为错误描述字符串；
-客户端无符合条件数据时，ret为成功，ret\_data返回None
+**返回**\ ： 
+
+ret\_code失败时，ret\_data为错误描述字符串；
+客户端无符合条件数据时，ret为成功，ret\_data返回None；
+
 通常情况下，返回字典
 
 .. code:: python
@@ -1397,7 +1412,9 @@ ret\_code失败时，ret\_data为错误描述字符串；
 **返回**\ ：
 
 ret\_code失败时，ret\_data为错误描述字符串；
-客户端无符合条件数据时，ret为成功，ret\_data返回None 通常情况下，返回
+客户端无符合条件数据时，ret为成功，ret\_data返回None；
+
+通常情况下，返回
 
 **time** 时间
 
@@ -1456,7 +1473,9 @@ ret\_code失败时，ret\_data为错误描述字符串；
 **返回**\ ：
 
 ret\_code失败时，ret\_data为错误描述字符串；
-客户端无符合条件数据时，ret为成功，ret\_data返回None 通常情况下，返回
+客户端无符合条件数据时，ret为成功，ret\_data返回None；
+
+通常情况下，返回
 bid\_data是买盘的数据，包括：
 
 **bid\_broker\_id** 经纪卖盘id
